@@ -31,9 +31,6 @@
                     </li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('frontend.personal_center') }}">个人中心</a>
-                    </li>
-                    <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('frontend.create_article') }}">发布文章</a>
                     </li>
                     <li class="nav-item">
@@ -51,7 +48,7 @@
                 <ul class="navbar-nav">
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Hello, {{ current_user.username }}</a>
+                        <a class="nav-link" href="{{ url_for('frontend.personal_center') }}">Hello, {{ current_user.display_name }}</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('frontend.logout') }}">退出</a>
