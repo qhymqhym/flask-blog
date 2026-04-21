@@ -8,12 +8,12 @@
     .container {
         overflow-x: hidden;
     }
-    
+
     /* EasyMDE编辑器样式 */
     .easymde {
         margin-bottom: 20px;
     }
-    
+
     .CodeMirror {
         font-family: 'Courier New', Courier, monospace;
         font-size: 14px;
@@ -34,7 +34,8 @@
             <label for="category_id">分类</label>
             <select class="form-control" id="category_id" name="category_id" required>
                 {% for category in categories %}
-                <option value="{{ category.id }}" {% if article.category_id==category.id %}selected{% endif %}>{{ category.name }}</option>
+                <option value="{{ category.id }}" {% if article.category_id==category.id %}selected{% endif %}>{{
+                    category.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -51,12 +52,14 @@
             <label for="cover">封面图</label>
             <input type="file" class="form-control" id="cover" name="cover">
             {% if article.cover_image %}
-            <img src="{{ url_for('static', filename='images/' ~ article.cover_image) }}" class="img-thumbnail mt-2" style="max-width: 200px;">
+            <img src="{{ url_for('static', filename='images/' ~ article.cover_image) }}" class="img-thumbnail mt-2"
+                style="max-width: 200px;">
             {% endif %}
         </div>
         <div class="form-group mb-3">
             <label for="content">内容</label>
-            <textarea class="form-control" id="content" name="content" rows="15" required>{{ article.content }}</textarea>
+            <textarea class="form-control" id="content" name="content" rows="15"
+                required>{{ article.content }}</textarea>
             <small class="form-text text-muted">支持Markdown格式</small>
         </div>
         <div class="form-group mb-3">
@@ -78,7 +81,7 @@
 <!-- EasyMDE JS -->
 <script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const easyMDE = new EasyMDE({
             element: document.getElementById('content'),
             spellChecker: false,
@@ -86,15 +89,15 @@
                 'bold', 'italic', 'heading', '|',
                 'code', 'quote', 'unordered-list', 'ordered-list', '|',
                 'link', 'image', '|',
-                'preview', '|',
+                'preview', 'side-by-side', '|',
                 'guide'
             ],
             sideBySideFullscreen: false,
             placeholder: '请输入Markdown内容...'
         });
-        
+
         // 确保表单提交时内容被同步
-        document.querySelector('form').addEventListener('submit', function() {
+        document.querySelector('form').addEventListener('submit', function () {
             easyMDE.save();
         });
     });
