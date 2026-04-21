@@ -1,0 +1,240 @@
+{% extends 'frontend/base.html' %}
+
+{% block head %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<div class="col-md-12">
+    <div class="card shadow-lg rounded-lg overflow-hidden">
+        <div class="card-header bg-primary text-white">
+            <h3 class="text-center">AI智能伴侣</h3>
+        </div>
+        <div class="card-body p-0">
+            <div class="row m-0">
+                <!-- 左侧控制面板 -->
+                <div class="col-md-3 sidebar">
+                    <h5 class="mb-3">AI控制面板</h5>
+                    <button id="new-session" class="btn btn-primary btn-block mb-3">新建会话</button>
+                    
+                    <h5 class="mb-3">会话历史</h5>
+                    <div id="session-list">
+                        {% for session in sessions %}
+                        <div class="session-item">
+                            <button class="btn btn-sm {% if session == current_session_name %}btn-primary current-session{% else %}btn-secondary{% endif %} load-session" data-session="{{ session }}">{{ session }}</button>
+                            <button class="btn btn-sm btn-danger delete-session" data-session="{{ session }}">删除</button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <hr class="my-3">
+                    
+                    <h5 class="mb-3">伴侣性格</h5>
+                    <div class="form-group">
+                        <label for="nick-name">昵称</label>
+                        <input type="text" id="nick-name" class="form-control" value="{{ nick_name }}">
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="character">性格</label>
+                        <textarea id="character" class="form-control" rows="3">{{ character }}</textarea>
+                    </div>
+                    <div class="form-group mt-2">
+                        <label for="model">选择模型</label>
+                        <select id="model" class="form-control">
+                            <option value="deepseek-chat">DeepSeek Chat</option>
+                            <option value="glm-4.5-air">GLM-4.5-Air</option>
+                            <option value="glm-4.7">GLM-4.7</option>
+                            <option value="aliyun">阿里云模型</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 右侧聊天界面 -->
+                <div class="col-md-9 p-4">
+                    <div class="session-info">
+                        <strong>当前会话：</strong>{% if sessions %}{{ sessions[0] }}{% else %}无{% endif %}
+                    </div>
+                    <div class="chat-area">
+                        <div id="chat-container" class="chat-container">
+                            {% for message in messages %}
+                            <div class="chat-message {% if message.role == 'user' %}user-message{% else %}assistant-message{% endif %}">
+                                {{ message.content }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="input-area">
+                            <div class="input-group">
+                                <input type="text" id="chat-input" class="form-control" placeholder="请输入你的问题...">
+                                <button id="send-btn" class="btn btn-primary">发送</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}
+
+{% block script %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 会话管理
+        const newSessionBtn = document.getElementById('new-session');
+        const sessionList = document.getElementById('session-list');
+        const loadSessionBtns = document.querySelectorAll('.load-session');
+        const deleteSessionBtns = document.querySelectorAll('.delete-session');
+        
+        // 聊天相关
+        const chatContainer = document.getElementById('chat-container');
+        const chatInput = document.getElementById('chat-input');
+        const sendBtn = document.getElementById('send-btn');
+        
+        // 性格设置
+        const nickNameInput = document.getElementById('nick-name');
+        const characterInput = document.getElementById('character');
+        
+        // 新建会话
+        newSessionBtn.addEventListener('click', function() {
+            fetch('/ai_companion/new_session', {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.reload();
+                }
+            });
+        });
+        
+        // 加载会话
+        loadSessionBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const sessionName = this.getAttribute('data-session');
+                fetch(`/ai_companion/load_session?session=${sessionName}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // 重新加载页面并传递current_session参数
+                        window.location.href = `/ai_companion?current_session=${sessionName}`;
+                    }
+                });
+            });
+        });
+        
+        // 删除会话
+        deleteSessionBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const sessionName = this.getAttribute('data-session');
+                if (confirm('确定要删除这个会话吗？')) {
+                    fetch(`/ai_companion/delete_session?session=${sessionName}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        }
+                    });
+                }
+            });
+        });
+        
+        // 发送消息
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+            
+            // 生成唯一ID
+            const messageId = 'assistant-message-' + Date.now();
+            
+            // 添加用户消息到界面
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'chat-message user-message';
+            userMessageDiv.textContent = message;
+            chatContainer.appendChild(userMessageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // 清空输入框
+            chatInput.value = '';
+            
+            // 添加AI消息占位符
+            const assistantMessageDiv = document.createElement('div');
+            assistantMessageDiv.className = 'chat-message assistant-message';
+            assistantMessageDiv.id = messageId;
+            chatContainer.appendChild(assistantMessageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // 获取性格设置和模型选择
+            const nickName = nickNameInput.value;
+            const character = characterInput.value;
+            const model = document.getElementById('model').value;
+            
+            // 发送请求到后端
+            fetch('/ai_companion/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    nick_name: nickName,
+                    character: character,
+                    model: model
+                })
+            })
+            .then(response => {
+                const reader = response.body.getReader();
+                let fullResponse = '';
+                
+                function read() {
+                    return reader.read().then(({ done, value }) => {
+                        if (done) {
+                            return fullResponse;
+                        }
+                        const chunk = new TextDecoder('utf-8').decode(value);
+                        fullResponse += chunk;
+                        document.getElementById(messageId).textContent = fullResponse;
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                        return read();
+                    });
+                }
+                
+                return read();
+            })
+            .then(response => {
+                // 保存性格设置
+                fetch('/ai_companion/save_settings', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nick_name: nickName,
+                        character: character
+                    })
+                });
+            })
+            .catch(error => {
+                document.getElementById(messageId).textContent = '出错了，请重试';
+                console.error('Error:', error);
+            });
+        }
+        
+        // 发送按钮点击事件
+        sendBtn.addEventListener('click', sendMessage);
+        
+        // 回车键发送
+        chatInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // 确保输入框获得焦点
+        chatInput.focus();
+    });
+</script>
+{% endblock %}

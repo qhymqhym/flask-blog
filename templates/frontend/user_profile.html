@@ -1,0 +1,158 @@
+{% extends 'frontend/base.html' %}
+
+{% block head %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2rem;
+        border-radius: 12px;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: bold;
+        color: #667eea;
+        margin: 0 auto 1rem;
+    }
+    
+    .profile-stats {
+        margin: 2rem 0;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        margin: 0 0.5rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #667eea;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+    }
+    
+    .bio-section {
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+    }
+    
+    .articles-section {
+        margin-top: 2rem;
+    }
+    
+    .article-card {
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .article-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="col-md-8">
+    <!-- 个人资料头部 -->
+    <div class="profile-header text-center">
+        <div class="profile-avatar">
+            {{ user.display_name[0].upper() }}
+        </div>
+        <h1>{{ user.display_name }}</h1>
+        {% if user.email %}
+        <p class="text-light">✉️ {{ user.email }}</p>
+        {% endif %}
+        <p class="text-light">注册时间: {{ user.created_at.strftime('%Y-%m-%d') }}</p>
+    </div>
+    
+    <!-- 个人简介 -->
+    <div class="bio-section">
+        <h3>个人简介</h3>
+        {% if user.bio %}
+        <p>{{ user.bio }}</p>
+        {% else %}
+        <p class="text-muted">该用户还没有添加个人简介</p>
+        {% endif %}
+    </div>
+    
+    <!-- 统计数据 -->
+    <div class="profile-stats row">
+        <div class="col-md-4 stat-item">
+            <div class="stat-number">{{ total_articles }}</div>
+            <div class="stat-label">已发布文章</div>
+        </div>
+        <div class="col-md-4 stat-item">
+            <div class="stat-number">{{ total_comments }}</div>
+            <div class="stat-label">发表评论</div>
+        </div>
+        <div class="col-md-4 stat-item">
+            <div class="stat-number">{{ total_likes }}</div>
+            <div class="stat-label">获得点赞</div>
+        </div>
+    </div>
+    
+    <!-- 文章列表 -->
+    <div class="articles-section">
+        <h3>发布的文章</h3>
+        {% if articles %}
+        {% for article in articles %}
+        <div class="card article-card">
+            {% if article.cover_image %}
+            <div class="card-img-container">
+                <img src="{{ url_for('static', filename='images/' ~ article.cover_image) }}" class="card-img-top" alt="{{ article.title }}">
+            </div>
+            {% endif %}
+            <div class="card-body">
+                <h2 class="card-title">
+                    {% if article.is_top %}
+                    <span class="badge bg-danger me-2">置顶</span>
+                    {% endif %}
+                    <a href="{{ url_for('frontend.article_detail', id=article.id) }}">{{ article.title }}</a>
+                </h2>
+                <p class="card-text text-muted">
+                    <small>
+                        {{ article.created_at.strftime('%Y-%m-%d') }} |
+                        <a href="{{ url_for('frontend.category_detail', id=article.category.id) }}">{{ article.category.name }}</a> |
+                        浏览 {{ article.views }} 次
+                    </small>
+                </p>
+                <div class="mb-2">
+                    {% for tag in article.tags %}
+                    <span class="badge bg-primary me-1">
+                        <a href="{{ url_for('frontend.tag_detail', id=tag.id) }}" class="text-white text-decoration-none">{{ tag.name }}</a>
+                    </span>
+                    {% endfor %}
+                </div>
+                <p class="card-text">{{ article.content[:150] }}...</p>
+                <a href="{{ url_for('frontend.article_detail', id=article.id) }}" class="btn btn-primary">阅读更多</a>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p class="text-center text-muted">该用户还没有发布文章</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

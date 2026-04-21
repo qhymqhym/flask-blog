@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人博客</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('frontend.index') }}">个人博客</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.index') }}">首页</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.about') }}">关于</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.ai_companion') }}">AI伴侣</a>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.personal_center') }}">个人中心</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.create_article') }}">发布文章</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.import_markdown') }}">批量导入</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.my_articles') }}">我的文章</a>
+                    </li>
+                    {% endif %}
+                </ul>
+                <form class="d-flex me-4" action="{{ url_for('frontend.search') }}" method="get">
+                    <input class="form-control me-2" type="search" placeholder="搜索文章..." name="q" aria-label="Search">
+                    <button class="btn btn-outline-success" type="submit">搜索</button>
+                </form>
+                <ul class="navbar-nav">
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Hello, {{ current_user.username }}</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.logout') }}">退出</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.login') }}">登录</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('frontend.register') }}">注册</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- 显示flash消息 -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category if category else 'info' }} alert-dismissible fade show mb-4" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        
+        <div class="row">
+            {% block content %}{% endblock %}
+            {% block sidebar %}
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>分类</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled category-list">
+                            {% for category in categories %}
+                            <li>
+                                <a href="{{ url_for('frontend.category_detail', id=category.id) }}">{{ category.name
+                                    }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>标签云</h5>
+                    </div>
+                    <div class="card-body tag-cloud">
+                        {% for tag in tags %}
+                        <span class="badge me-2 mb-2">
+                            <a href="{{ url_for('frontend.tag_detail', id=tag.id) }}" class="text-decoration-none">{{
+                                tag.name }}</a>
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 点赞数前十 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>点赞数前十</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if top_liked_articles %}
+                        <ul class="list-unstyled">
+                            {% for article in top_liked_articles %}
+                            <li class="mb-2">
+                                <a href="{{ url_for('frontend.article_detail', id=article.id) }}"
+                                    class="text-decoration-none">
+                                    {{ article.title }}
+                                </a>
+                                <small class="d-block text-muted">
+                                    {{ article.author.username }} | {{ article.like_count }} 赞
+                                </small>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>暂无数据</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- 访问量前十 -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5>访问量前十</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if top_viewed_articles %}
+                        <ul class="list-unstyled">
+                            {% for article in top_viewed_articles %}
+                            <li class="mb-2">
+                                <a href="{{ url_for('frontend.article_detail', id=article.id) }}"
+                                    class="text-decoration-none">
+                                    {{ article.title }}
+                                </a>
+                                <small class="d-block text-muted">
+                                    {{ article.author.username }} | {{ article.views }} 次访问
+                                </small>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                        {% else %}
+                        <p>暂无数据</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endblock %}
+        </div>
+    </div>
+
+    <footer class="mt-4 py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12 text-center">
+                    <p>&copy; 2026 个人博客. All rights reserved.</p>
+                    <p class="mt-2 text-sm opacity-75">用❤️打造的个人空间</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block script %}{% endblock %}
+</body>
+
+</html>

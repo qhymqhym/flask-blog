@@ -1,0 +1,43 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">仪表盘</h1>
+<div class="dashboard-cards">
+    <a href="{{ url_for('admin.articles') }}" class="text-decoration-none">
+        <div class="dashboard-card blue">
+            <h3>文章总数</h3>
+            <p class="number">{{ articles }}</p>
+        </div>
+    </a>
+    <a href="{{ url_for('admin.categories') }}" class="text-decoration-none">
+        <div class="dashboard-card green">
+            <h3>分类总数</h3>
+            <p class="number">{{ categories }}</p>
+        </div>
+    </a>
+    <a href="{{ url_for('admin.tags') }}" class="text-decoration-none">
+        <div class="dashboard-card cyan">
+            <h3>标签总数</h3>
+            <p class="number">{{ tags }}</p>
+        </div>
+    </a>
+    <a href="{{ url_for('admin.comments') }}" class="text-decoration-none">
+        <div class="dashboard-card yellow">
+            <h3>评论总数</h3>
+            <p class="number">{{ comments }}</p>
+        </div>
+    </a>
+    <a href="{{ url_for('admin.users') }}" class="text-decoration-none">
+        <div class="dashboard-card red">
+            <h3>用户总数</h3>
+            <p class="number">{{ users }}</p>
+        </div>
+    </a>
+    <a href="{{ url_for('admin.stats') }}" class="text-decoration-none">
+        <div class="dashboard-card gray">
+            <h3>总访问量</h3>
+            <p class="number">{{ total_visits }}</p>
+        </div>
+    </a>
+</div>
+{% endblock %}

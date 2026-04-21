@@ -1,0 +1,642 @@
+{% extends 'frontend/base.html' %}
+
+{% block head %}
+<style>
+    /* Markdown 渲染样式，与 Editor.md 预览一致 */
+    .content {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    .content h1,
+    .content h2,
+    .content h3,
+    .content h4,
+    .content h5,
+    .content h6 {
+        margin-top: 24px;
+        margin-bottom: 16px;
+        font-weight: 600;
+        line-height: 1.25;
+    }
+
+    .content h1 {
+        font-size: 2em;
+        border-bottom: 1px solid #eaecef;
+        padding-bottom: 0.3em;
+    }
+
+    .content h2 {
+        font-size: 1.5em;
+        border-bottom: 1px solid #eaecef;
+        padding-bottom: 0.3em;
+    }
+
+    .content h3 {
+        font-size: 1.25em;
+    }
+
+    .content p {
+        margin-top: 0;
+        margin-bottom: 16px;
+    }
+
+    .content ul,
+    .content ol {
+        margin-top: 0;
+        margin-bottom: 16px;
+        padding-left: 2em;
+    }
+
+    .content li {
+        margin-top: 0.25em;
+    }
+
+    .content a {
+        color: #0366d6;
+        text-decoration: none;
+    }
+
+    .content a:hover {
+        text-decoration: underline;
+    }
+
+    .content strong {
+        font-weight: 600;
+    }
+
+    .content em {
+        font-style: italic;
+    }
+
+    .content code {
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        padding: 0.2em 0.4em;
+        margin: 0;
+        font-size: 85%;
+        background-color: rgba(27, 31, 35, 0.05);
+        border-radius: 3px;
+    }
+
+    .content pre {
+        font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        padding: 16px;
+        overflow: auto;
+        font-size: 85%;
+        line-height: 1.45;
+        background-color: #f6f8fa;
+        border-radius: 3px;
+        margin-top: 0;
+        margin-bottom: 16px;
+    }
+
+    .content pre code {
+        display: inline;
+        padding: 0;
+        margin: 0;
+        background: none;
+        font-size: 100%;
+    }
+
+    .content blockquote {
+        border-left: 4px solid #dfe2e5;
+        padding: 0 1em;
+        color: #6a737d;
+        margin-top: 0;
+        margin-bottom: 16px;
+    }
+
+    .content blockquote p {
+        margin-bottom: 0;
+    }
+
+    .content table {
+        border-collapse: collapse;
+        margin-top: 0;
+        margin-bottom: 16px;
+        width: 100%;
+        overflow: auto;
+    }
+
+    .content table th {
+        font-weight: 600;
+        padding: 6px 13px;
+        border: 1px solid #dfe2e5;
+        background-color: #f6f8fa;
+    }
+
+    .content table td {
+        padding: 6px 13px;
+        border: 1px solid #dfe2e5;
+    }
+
+    .content table tr {
+        background-color: #fff;
+        border-top: 1px solid #c6cbd1;
+    }
+
+    .content table tr:nth-child(2n) {
+        background-color: #f6f8fa;
+    }
+
+    .content img {
+        max-width: 100%;
+        box-sizing: content-box;
+        background-color: #fff;
+    }
+
+    .content hr {
+        height: 0.25em;
+        background-color: #eaecef;
+        border: 0;
+        margin-top: 24px;
+        margin-bottom: 24px;
+    }
+
+    /* Pygments 代码高亮样式 */
+    .codehilite {
+        padding: 16px;
+        overflow: auto;
+        font-size: 85%;
+        line-height: 1.45;
+        background-color: #f6f8fa;
+        border-radius: 3px;
+        margin-top: 0;
+        margin-bottom: 16px;
+    }
+
+    .codehilite pre {
+        margin: 0;
+        padding: 0;
+        background: none;
+    }
+
+    .codehilite table {
+        margin: 0;
+        width: auto;
+        border: none;
+    }
+
+    .codehilite td {
+        border: none;
+        padding: 0;
+    }
+
+    .codehilite .linenos {
+        padding-right: 16px;
+        text-align: right;
+        color: #6a737d;
+        background-color: #f6f8fa;
+        border-right: 1px solid #eaecef;
+    }
+
+    .codehilite .code {
+        padding-left: 16px;
+    }
+
+    /* 代码高亮主题 */
+    .codehilite .hll {
+        background-color: #ffffcc;
+    }
+
+    .codehilite .c {
+        color: #6a737d;
+        font-style: italic;
+    }
+
+    .codehilite .err {
+        color: #d73a49;
+        background-color: #fce5e5;
+    }
+
+    .codehilite .k {
+        color: #d73a49;
+        font-weight: 600;
+    }
+
+    .codehilite .o {
+        color: #005cc5;
+    }
+
+    .codehilite .cm {
+        color: #6a737d;
+        font-style: italic;
+    }
+
+    .codehilite .cp {
+        color: #d73a49;
+    }
+
+    .codehilite .c1 {
+        color: #6a737d;
+        font-style: italic;
+    }
+
+    .codehilite .cs {
+        color: #6a737d;
+        font-style: italic;
+    }
+
+    .codehilite .gd {
+        color: #d73a49;
+        background-color: #fce5e5;
+    }
+
+    .codehilite .ge {
+        font-style: italic;
+    }
+
+    .codehilite .gr {
+        color: #d73a49;
+    }
+
+    .codehilite .gh {
+        color: #24292e;
+        font-weight: 600;
+    }
+
+    .codehilite .gi {
+        color: #28a745;
+        background-color: #d4edda;
+    }
+
+    .codehilite .go {
+        color: #6a737d;
+    }
+
+    .codehilite .gp {
+        color: #005cc5;
+        font-weight: 600;
+    }
+
+    .codehilite .gs {
+        font-weight: 600;
+    }
+
+    .codehilite .gu {
+        color: #6f42c1;
+        font-weight: 600;
+    }
+
+    .codehilite .gt {
+        color: #d73a49;
+    }
+
+    .codehilite .kc {
+        color: #d73a49;
+        font-weight: 600;
+    }
+
+    .codehilite .kd {
+        color: #d73a49;
+        font-weight: 600;
+    }
+
+    .codehilite .kn {
+        color: #d73a49;
+        font-weight: 600;
+    }
+
+    .codehilite .kp {
+        color: #d73a49;
+    }
+
+    .codehilite .kr {
+        color: #d73a49;
+        font-weight: 600;
+    }
+
+    .codehilite .kt {
+        color: #d73a49;
+    }
+
+    .codehilite .m {
+        color: #005cc5;
+    }
+
+    .codehilite .s {
+        color: #032f62;
+    }
+
+    .codehilite .na {
+        color: #005cc5;
+    }
+
+    .codehilite .nb {
+        color: #005cc5;
+    }
+
+    .codehilite .nc {
+        color: #6f42c1;
+        font-weight: 600;
+    }
+
+    .codehilite .no {
+        color: #005cc5;
+    }
+
+    .codehilite .nd {
+        color: #005cc5;
+    }
+
+    .codehilite .ni {
+        color: #005cc5;
+    }
+
+    .codehilite .ne {
+        color: #6f42c1;
+        font-weight: 600;
+    }
+
+    .codehilite .nf {
+        color: #6f42c1;
+        font-weight: 600;
+    }
+
+    .codehilite .nl {
+        color: #005cc5;
+    }
+
+    .codehilite .nn {
+        color: #6f42c1;
+        font-weight: 600;
+    }
+
+    .codehilite .nx {
+        color: #005cc5;
+    }
+
+    .codehilite .py {
+        color: #005cc5;
+    }
+
+    .codehilite .nt {
+        color: #22863a;
+        font-weight: 600;
+    }
+
+    .codehilite .nv {
+        color: #005cc5;
+    }
+
+    .codehilite .ow {
+        color: #d73a49;
+        font-weight: 600;
+    }
+
+    .codehilite .w {
+        color: #6a737d;
+    }
+
+    .codehilite .mf {
+        color: #005cc5;
+    }
+
+    .codehilite .mh {
+        color: #005cc5;
+    }
+
+    .codehilite .mi {
+        color: #005cc5;
+    }
+
+    .codehilite .mo {
+        color: #005cc5;
+    }
+
+    .codehilite .sa {
+        color: #032f62;
+    }
+
+    .codehilite .sb {
+        color: #032f62;
+    }
+
+    .codehilite .sc {
+        color: #032f62;
+    }
+
+    .codehilite .dl {
+        color: #032f62;
+    }
+
+    .codehilite .sd {
+        color: #032f62;
+        font-style: italic;
+    }
+
+    .codehilite .s2 {
+        color: #032f62;
+    }
+
+    .codehilite .se {
+        color: #032f62;
+        font-weight: 600;
+    }
+
+    .codehilite .sh {
+        color: #032f62;
+    }
+
+    .codehilite .si {
+        color: #032f62;
+    }
+
+    .codehilite .sx {
+        color: #032f62;
+    }
+
+    .codehilite .sr {
+        color: #22863a;
+    }
+
+    .codehilite .s1 {
+        color: #032f62;
+    }
+
+    .codehilite .ss {
+        color: #22863a;
+    }
+
+    .codehilite .bp {
+        color: #005cc5;
+    }
+
+    .codehilite .fm {
+        color: #6f42c1;
+        font-weight: 600;
+    }
+
+    .codehilite .vc {
+        color: #005cc5;
+    }
+
+    .codehilite .vg {
+        color: #005cc5;
+    }
+
+    .codehilite .vi {
+        color: #005cc5;
+    }
+
+    .codehilite .vm {
+        color: #005cc5;
+    }
+
+    .codehilite .il {
+        color: #005cc5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="col-md-8">
+    <article class="mb-4">
+        {% if article.cover_image %}
+        <img src="{{ url_for('static', filename='images/' ~ article.cover_image) }}" class="img-fluid mb-4"
+            alt="{{ article.title }}">
+        {% endif %}
+        <h1 class="mb-4">{{ article.title }}</h1>
+        <p class="text-muted mb-4">
+            <small>
+                {{ article.created_at.strftime('%Y-%m-%d') }} |
+                <a href="{{ url_for('frontend.category_detail', id=article.category.id) }}">{{ article.category.name }}</a>
+                |
+                作者: <a href="{{ url_for('frontend.user_profile', user_id=article.author.id) }}">{{ article.author.display_name }}</a> |
+                浏览 {{ article.views }} 次 |
+                <span id="like-count">{{ article.like_count }}</span> 人点赞
+                {% if current_user.is_authenticated %}
+                <button id="like-btn" class="btn btn-sm btn-outline-primary ml-2">
+                    {% if current_user in article.likes %}取消点赞{% else %}点赞{% endif %}
+                </button>
+                {% else %}
+                <a href="{{ url_for('frontend.login') }}" class="btn btn-sm btn-outline-primary ml-2">登录点赞</a>
+                {% endif %}
+            </small>
+        </p>
+        <div class="mb-4">
+            {% for tag in article.tags %}
+            <span class="badge bg-primary me-1">
+                <a href="{{ url_for('frontend.tag_detail', id=tag.id) }}" class="text-white text-decoration-none">{{ tag.name }}</a>
+            </span>
+            {% endfor %}
+        </div>
+        <div class="content mb-6">
+            {{ article.content_html|safe }}
+        </div>
+    </article>
+
+    <section class="comments">
+        <h2 class="mb-4">评论</h2>
+        {% if current_user.is_authenticated %}
+        <form action="{{ url_for('frontend.add_comment', id=article.id) }}" method="post" class="mb-4">
+            <div class="form-group mb-2">
+                <label for="content">评论内容</label>
+                <textarea class="form-control" id="content" name="content" rows="4" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">提交评论</button>
+        </form>
+        {% else %}
+        <p>请 <a href="{{ url_for('frontend.login') }}">登录</a> 后发表评论</p>
+        {% endif %}
+
+        {% if comments %}
+        <div class="comment-list">
+            {% for comment in comments %}
+            <div class="comment mb-4 p-3 border rounded">
+                <div class="d-flex justify-content-between">
+                    <h5>{{ comment.author }}</h5>
+                    <small class="text-muted">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                <p>{{ comment.content }}</p>
+                {% if comment.replies %}
+                <div class="replies ml-4 mt-3">
+                    {% for reply in comment.replies %}
+                    {% if reply.status == 'approved' %}
+                    <div class="reply mb-2 p-2 border rounded">
+                        <div class="d-flex justify-content-between">
+                            <h6>{{ reply.author }}</h6>
+                            <small class="text-muted">{{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <p>{{ reply.content }}</p>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+                <button class="btn btn-sm btn-outline-secondary mt-2 reply-btn" data-comment-id="{{ comment.id }}">回复</button>
+                <div class="reply-form mt-2 d-none" id="reply-form-{{ comment.id }}">
+                    <form action="{{ url_for('frontend.add_reply', id=article.id) }}" method="post">
+                        <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                        <div class="form-group mb-2">
+                            <textarea class="form-control" name="content" rows="2" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-sm btn-primary">提交回复</button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary cancel-reply" data-comment-id="{{ comment.id }}">取消</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p>暂无评论，快来发表第一条评论吧！</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}
+
+{% block script %}
+<script>
+    // 处理回复按钮点击事件
+    document.addEventListener('DOMContentLoaded', function () {
+        // 回复按钮点击事件
+        document.querySelectorAll('.reply-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-comment-id');
+                const replyForm = document.getElementById(`reply-form-${commentId}`);
+                replyForm.classList.remove('d-none');
+            });
+        });
+
+        // 取消回复按钮点击事件
+        document.querySelectorAll('.cancel-reply').forEach(button => {
+            button.addEventListener('click', function () {
+                const commentId = this.getAttribute('data-comment-id');
+                const replyForm = document.getElementById(`reply-form-${commentId}`);
+                replyForm.classList.add('d-none');
+            });
+        });
+
+        // 处理点赞按钮点击事件
+        const likeBtn = document.getElementById('like-btn');
+        if (likeBtn) {
+            likeBtn.addEventListener('click', function () {
+                const articleId = {{ article.id }};
+                
+                fetch(`/article/${articleId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(function (response) {
+                    return response.json();
+                })
+                .then(function (data) {
+                    document.getElementById('like-count').textContent = data.like_count;
+                    if (data.status === 'liked') {
+                        likeBtn.textContent = '取消点赞';
+                    } else {
+                        likeBtn.textContent = '点赞';
+                    }
+                })
+                .catch(function (error) {
+                    console.error('Error:', error);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

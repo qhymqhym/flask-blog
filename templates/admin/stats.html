@@ -1,0 +1,295 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">访问统计</h1>
+<div class="card mb-4">
+    <div class="card-body">
+        <h5 class="card-title">总访问量</h5>
+        <p class="card-text display-4">{{ total_visits }}</p>
+    </div>
+</div>
+
+<!-- 访问趋势图 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>访问趋势</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="visitChart" width="400" height="150"></canvas>
+    </div>
+</div>
+
+<!-- 文章访问量排行 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>文章访问量排行</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="articleVisitChart" width="400" height="150"></canvas>
+    </div>
+</div>
+
+<!-- 分类占比 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>分类占比</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="categoryChart" width="400" height="150"></canvas>
+    </div>
+</div>
+
+<!-- 标签占比 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>标签占比</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="tagChart" width="400" height="150"></canvas>
+    </div>
+</div>
+
+<!-- 文章点赞排行 -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>文章点赞排行</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="articleLikeChart" width="400" height="150"></canvas>
+    </div>
+</div>
+
+
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script>
+    // 访问趋势数据
+    const dailyVisits = [
+        {% for visit in daily_visits %}
+    { date: '{{ visit.date }}', count: {{ visit.count }} },
+    {% endfor %}
+        ];
+
+    // 文章访问量数据
+    const articleVisits = [
+        {% for article in article_visits %}
+    { title: '{{ article.title }}', count: {{ article.visit_count }} },
+    {% endfor %}
+        ];
+
+    // 分类占比数据
+    const categoryData = [
+        {% for category in category_article_count %}
+    { name: '{{ category.name }}', count: {{ category.count }} },
+    {% endfor %}
+        ];
+
+    // 标签占比数据
+    const tagData = [
+        {% for tag in tag_article_count %}
+    { name: '{{ tag.name }}', count: {{ tag.count }} },
+    {% endfor %}
+        ];
+
+    // 文章点赞数据
+    const articleLikes = [
+        {% for article in article_likes %}
+    { title: '{{ article.title }}', count: {{ article.like_count }} },
+    {% endfor %}
+        ];
+
+    // 访问趋势图
+    const visitCtx = document.getElementById('visitChart').getContext('2d');
+    const visitChart = new Chart(visitCtx, {
+        type: 'line',
+        data: {
+            labels: dailyVisits.map(item => item.date),
+            datasets: [{
+                label: '访问量',
+                data: dailyVisits.map(item => item.count),
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 文章访问量排行图
+    const articleVisitCtx = document.getElementById('articleVisitChart').getContext('2d');
+    const articleVisitChart = new Chart(articleVisitCtx, {
+        type: 'bar',
+        data: {
+            labels: articleVisits.map(item => item.title.length > 10 ? item.title.substring(0, 10) + '...' : item.title),
+            datasets: [{
+                label: '访问量',
+                data: articleVisits.map(item => item.count),
+                backgroundColor: 'rgba(54, 162, 235, 0.6)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // 分类占比图
+    const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+    const categoryChart = new Chart(categoryCtx, {
+        type: 'pie',
+        data: {
+            labels: categoryData.map(item => item.name),
+            datasets: [{
+                data: categoryData.map(item => item.count),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    font: {
+                        size: 12
+                    }
+                }
+            }
+        }
+    });
+
+    // 标签占比图
+    const tagCtx = document.getElementById('tagChart').getContext('2d');
+    const tagChart = new Chart(tagCtx, {
+        type: 'doughnut',
+        data: {
+            labels: tagData.map(item => item.name),
+            datasets: [{
+                data: tagData.map(item => item.count),
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                    'rgba(255, 206, 86, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(199, 199, 199, 0.6)',
+                    'rgba(83, 102, 255, 0.6)',
+                    'rgba(255, 99, 255, 0.6)',
+                    'rgba(99, 255, 132, 0.6)'
+                ]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    font: {
+                        size: 12
+                    }
+                }
+            }
+        }
+    });
+
+    // 文章点赞排行图
+    const articleLikeCtx = document.getElementById('articleLikeChart').getContext('2d');
+    const articleLikeChart = new Chart(articleLikeCtx, {
+        type: 'bar',
+        data: {
+            labels: articleLikes.map(item => item.title.length > 10 ? item.title.substring(0, 10) + '...' : item.title),
+            datasets: [{
+                label: '点赞数',
+                data: articleLikes.map(item => item.count),
+                backgroundColor: 'rgba(255, 159, 64, 0.6)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    font: {
+                        size: 12
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                },
+                x: {
+                    ticks: {
+                        font: {
+                            size: 10
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

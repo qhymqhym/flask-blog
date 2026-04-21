@@ -1,0 +1,63 @@
+{% extends 'frontend/personal_center.html' %}
+
+{% block content %}
+<div class="col-md-12">
+    <div class="personal-center">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-avatar">
+                    {{ current_user.display_name[0].upper() }}
+                </div>
+                <h3>{{ current_user.display_name }}</h3>
+                <p class="text-light text-sm">个人中心</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('frontend.personal_center') }}">个人概览</a></li>
+                <li><a href="{{ url_for('frontend.personal_articles') }}">文章管理</a></li>
+                <li><a href="{{ url_for('frontend.personal_comments') }}" class="active">评论管理</a></li>
+                <li><a href="{{ url_for('frontend.personal_likes') }}">点赞管理</a></li>
+                <li><a href="{{ url_for('frontend.edit_profile') }}">编辑资料</a></li>
+                <li><a href="{{ url_for('frontend.change_password') }}">修改密码</a></li>
+                <li><a href="{{ url_for('frontend.user_profile', user_id=current_user.id) }}">查看个人主页</a></li>
+                <li><a href="{{ url_for('frontend.logout') }}">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <h2 class="section-title">评论管理</h2>
+            
+            <!-- 评论列表 -->
+            {% if comments %}
+            <div class="list-group">
+                {% for comment in comments %}
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <h5 class="mb-1">
+                            <a href="{{ url_for('frontend.article_detail', id=comment.article_id) }}">{{ comment.article.title }}</a>
+                        </h5>
+                        <span class="text-muted">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    <p class="mb-2">{{ comment.content }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-{{ 'success' if comment.status == 'approved' else 'secondary' }}">
+                            {{ '已通过' if comment.status == 'approved' else '待审核' }}
+                        </span>
+                        <div>
+                            <a href="{{ url_for('frontend.article_detail', id=comment.article_id) }}#comments" class="btn btn-sm btn-primary mr-2">查看回复</a>
+                            <button class="btn btn-sm btn-danger" onclick="if(confirm('确定要删除这条评论吗？')) window.location.href='/delete_comment/{{ comment.id }}'">删除</button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                暂无评论
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

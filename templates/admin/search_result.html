@@ -1,0 +1,182 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+    <h1 class="mb-4">搜索结果</h1>
+    <p class="mb-4">搜索关键词: <strong>{{ query }}</strong></p>
+    
+    <!-- 文章搜索结果 -->
+    {% if articles %}
+        <div class="mb-6">
+            <h2 class="h4 mb-3">文章</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>标题</th>
+                        <th>作者</th>
+                        <th>分类</th>
+                        <th>状态</th>
+                        <th>置顶</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for article in articles %}
+                        <tr>
+                            <td>{{ article.title }}</td>
+                            <td>{{ article.author.username }}</td>
+                            <td>{{ article.category.name }}</td>
+                            <td>{{ article.status }}</td>
+                            <td>
+                                {% if article.is_top %}
+                                    <span class="badge bg-danger">是</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">否</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_article', id=article.id) }}" class="btn btn-sm btn-primary">编辑</a>
+                                <a href="{{ url_for('admin.delete_article', id=article.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除这篇文章吗？')">删除</a>
+                                <a href="{{ url_for('admin.toggle_top', id=article.id) }}" class="btn btn-sm btn-secondary">
+                                    {% if article.is_top %}
+                                        取消置顶
+                                    {% else %}
+                                        置顶
+                                    {% endif %}
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    
+    <!-- 用户搜索结果 -->
+    {% if users %}
+        <div class="mb-6">
+            <h2 class="h4 mb-3">用户</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_user', id=user.id) }}" class="btn btn-sm btn-primary">编辑</a>
+                                {% if user.username != 'admin' %}
+                                    <a href="{{ url_for('admin.delete_user', id=user.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除这个用户吗？')">删除</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    
+    <!-- 分类搜索结果 -->
+    {% if categories %}
+        <div class="mb-6">
+            <h2 class="h4 mb-3">分类</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for category in categories %}
+                        <tr>
+                            <td>{{ category.id }}</td>
+                            <td>{{ category.name }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_category', id=category.id) }}" class="btn btn-sm btn-primary">编辑</a>
+                                <a href="{{ url_for('admin.delete_category', id=category.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除这个分类吗？')">删除</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    
+    <!-- 标签搜索结果 -->
+    {% if tags %}
+        <div class="mb-6">
+            <h2 class="h4 mb-3">标签</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>名称</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tag in tags %}
+                        <tr>
+                            <td>{{ tag.id }}</td>
+                            <td>{{ tag.name }}</td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_tag', id=tag.id) }}" class="btn btn-sm btn-primary">编辑</a>
+                                <a href="{{ url_for('admin.delete_tag', id=tag.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除这个标签吗？')">删除</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    
+    <!-- 评论搜索结果 -->
+    {% if comments %}
+        <div class="mb-6">
+            <h2 class="h4 mb-3">评论</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>内容</th>
+                        <th>作者</th>
+                        <th>文章</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comment in comments %}
+                        <tr>
+                            <td>{{ comment.id }}</td>
+                            <td>{{ comment.content|truncate(50) }}</td>
+                            <td>{{ comment.author }}</td>
+                            <td>{{ comment.article.title|truncate(30) }}</td>
+                            <td>{{ comment.status }}</td>
+                            <td>
+                                {% if comment.status == 'pending' %}
+                                    <a href="{{ url_for('admin.approve_comment', id=comment.id) }}" class="btn btn-sm btn-success">批准</a>
+                                {% endif %}
+                                <a href="{{ url_for('admin.delete_comment', id=comment.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除这个评论吗？')">删除</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    
+    <!-- 无结果提示 -->
+    {% if not articles and not users and not categories and not tags and not comments %}
+        <div class="alert alert-info">
+            没有找到与 "{{ query }}" 相关的内容
+        </div>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,101 @@
+{% extends 'admin/base.html' %}
+
+{% block head %}
+<!-- EasyMDE CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.css">
+<style>
+    /* 确保容器有足够的空间 */
+    .container {
+        overflow-x: hidden;
+    }
+    
+    /* EasyMDE编辑器样式 */
+    .easymde {
+        margin-bottom: 20px;
+    }
+    
+    .CodeMirror {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">创建文章</h1>
+<form action="{{ url_for('admin.create_article') }}" method="post" enctype="multipart/form-data">
+    <div class="form-group mb-3">
+        <label for="title">标题</label>
+        <input type="text" class="form-control" id="title" name="title" required>
+    </div>
+    <div class="form-group mb-3">
+        <label for="category_id">分类</label>
+        <select class="form-control" id="category_id" name="category_id" required>
+            {% for category in categories %}
+            <option value="{{ category.id }}">{{ category.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="form-group mb-3">
+        <label for="tags">标签</label>
+        <select class="form-control" id="tags" name="tags" multiple required>
+            {% for tag in tags %}
+            <option value="{{ tag.id }}">{{ tag.name }}</option>
+            {% endfor %}
+        </select>
+        <small class="form-text text-muted">按住Ctrl键可选择多个标签</small>
+    </div>
+    <div class="form-group mb-3">
+        <label for="cover">封面图</label>
+        <input type="file" class="form-control" id="cover" name="cover">
+    </div>
+    <div class="form-group mb-3">
+        <label for="content">内容</label>
+        <textarea class="form-control" id="content" name="content" rows="15" style="display: none;"></textarea>
+        <small class="form-text text-muted">支持Markdown格式</small>
+    </div>
+    <div class="form-group mb-3">
+        <label for="status">状态</label>
+        <select class="form-control" id="status" name="status">
+            <option value="draft">草稿</option>
+            <option value="published">已发布</option>
+        </select>
+    </div>
+    <div class="form-group mb-3">
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="is_top" name="is_top">
+            <label class="form-check-label" for="is_top">置顶文章</label>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">保存</button>
+</form>
+{% endblock %}
+
+{% block script %}
+<!-- EasyMDE JS -->
+<script src="https://cdn.jsdelivr.net/npm/easymde/dist/easymde.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const easyMDE = new EasyMDE({
+            element: document.getElementById('content'),
+            spellChecker: false,
+            toolbar: [
+                'bold', 'italic', 'heading', '|',
+                'code', 'quote', 'unordered-list', 'ordered-list', '|',
+                'link', 'image', '|',
+                'preview', 'side-by-side', 'fullscreen', '|',
+                'guide'
+            ],
+            sideBySideFullscreen: false,
+            placeholder: '请输入Markdown内容...'
+        });
+        
+        // 表单提交时同步编辑器内容
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function() {
+            easyMDE.save();
+        });
+    });
+</script>
+{% endblock %}

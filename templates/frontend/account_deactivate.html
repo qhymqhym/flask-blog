@@ -1,0 +1,59 @@
+{% extends 'frontend/personal_center.html' %}
+
+{% block content %}
+<div class="col-md-12">
+    <div class="personal-center">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-avatar">
+                    {{ current_user.display_name[0].upper() }}
+                </div>
+                <h3>{{ current_user.display_name }}</h3>
+                <p class="text-light text-sm">个人中心</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('frontend.personal_center') }}">个人概览</a></li>
+                <li><a href="{{ url_for('frontend.personal_articles') }}">文章管理</a></li>
+                <li><a href="{{ url_for('frontend.personal_comments') }}">评论管理</a></li>
+                <li><a href="{{ url_for('frontend.personal_likes') }}">点赞管理</a></li>
+                <li><a href="{{ url_for('frontend.edit_profile') }}">编辑资料</a></li>
+                <li><a href="{{ url_for('frontend.change_password') }}">修改密码</a></li>
+                <li><a href="{{ url_for('frontend.user_profile', user_id=current_user.id) }}">查看个人主页</a></li>
+                <li><a href="{{ url_for('frontend.account_deactivate') }}" class="active">账号注销</a></li>
+                <li><a href="{{ url_for('frontend.logout') }}">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <h2 class="section-title">账号注销</h2>
+            
+            <!-- 账号注销表单 -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="alert alert-danger mb-4">
+                        <h4 class="alert-heading">警告</h4>
+                        <p>账号注销后，您的所有数据将被永久删除，包括：</p>
+                        <ul>
+                            <li>所有已发布和草稿文章</li>
+                            <li>所有评论和回复</li>
+                            <li>所有点赞记录</li>
+                            <li>个人资料信息</li>
+                        </ul>
+                        <p class="mb-0">此操作不可撤销，请谨慎操作！</p>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="form-group mb-3">
+                            <label for="password" class="form-label">输入密码确认</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="请输入当前密码" required>
+                        </div>
+                        <button type="submit" class="btn btn-danger">确认注销账号</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

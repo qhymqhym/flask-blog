@@ -1,0 +1,42 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>评论管理</h1>
+        <form class="d-flex" action="{{ url_for('admin.comments') }}" method="get">
+            <input class="form-control me-2" type="search" placeholder="搜索评论..." name="q" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">搜索</button>
+        </form>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>文章</th>
+                <th>作者</th>
+                <th>内容</th>
+                <th>状态</th>
+                <th>创建时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for comment in comments %}
+            <tr>
+                <td>{{ comment.id }}</td>
+                <td>{{ comment.article.title }}</td>
+                <td>{{ comment.author }}</td>
+                <td>{{ comment.content[:50] }}...</td>
+                <td>{{ '已批准' if comment.status == 'approved' else '待审核' }}</td>
+                <td>{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    {% if comment.status == 'pending' %}
+                    <a href="{{ url_for('admin.approve_comment', id=comment.id) }}" class="btn btn-sm btn-success">批准</a>
+                    {% endif %}
+                    <a href="{{ url_for('admin.delete_comment', id=comment.id) }}" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除吗？')">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

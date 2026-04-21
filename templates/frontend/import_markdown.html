@@ -1,0 +1,48 @@
+{% extends 'frontend/base.html' %}
+
+{% block head %}
+<style>
+    /* 确保卡片容器有足够的空间 */
+    .card-body {
+        overflow-x: hidden;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="col-md-12">
+    <div class="card shadow-lg rounded-lg overflow-hidden">
+        <div class="card-header bg-primary text-white">
+            <h3 class="text-center">批量导入Markdown文件</h3>
+        </div>
+        <div class="card-body p-5">
+            <form action="{{ url_for('frontend.import_markdown') }}" method="post" enctype="multipart/form-data">
+                <div class="form-group mb-4">
+                    <label for="category_id" class="form-label">分类</label>
+                    <select class="form-control form-control-lg" id="category_id" name="category_id" required>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="files" class="form-label">Markdown文件</label>
+                    <input type="file" class="form-control form-control-lg" id="files" name="files" multiple required>
+                    <small class="form-text text-muted">支持同时上传多个.md文件</small>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="status" class="form-label">状态</label>
+                    <select class="form-control form-control-lg" id="status" name="status">
+                        <option value="draft">草稿</option>
+                        <option value="published">已发布</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg btn-block">导入文章</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block sidebar %}
+{% endblock %}

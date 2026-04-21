@@ -1,0 +1,44 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>用户管理</h1>
+    <div class="d-flex">
+        <form class="d-flex me-3" action="{{ url_for('admin.users') }}" method="get">
+            <input class="form-control me-2" type="search" placeholder="搜索用户..." name="q" aria-label="Search">
+            <button class="btn btn-outline-success" type="submit">搜索</button>
+        </form>
+        <a href="{{ url_for('admin.create_user') }}" class="btn btn-primary">创建用户</a>
+    </div>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>用户名</th>
+            <th>创建时间</th>
+            <th>文章数</th>
+            <th>操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}{% if user.username == 'admin' %} <span class="badge bg-danger">管理员</span>{% endif %}</td>
+            <td>{{ user.created_at.strftime('%Y-%m-%d') }}</td>
+            <td>{{ user.articles|length }}</td>
+            <td>
+                {% if user.username != 'admin' %}
+                <a href="{{ url_for('admin.edit_user', id=user.id) }}" class="btn btn-sm btn-primary">编辑</a>
+                <a href="{{ url_for('admin.delete_user', id=user.id) }}" class="btn btn-sm btn-danger"
+                    onclick="return confirm('确定要删除吗？')">删除</a>
+                {% else %}
+                <span class="text-muted">不可编辑</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

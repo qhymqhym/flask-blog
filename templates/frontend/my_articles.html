@@ -1,0 +1,51 @@
+{% extends 'frontend/base.html' %}
+
+{% block content %}
+<div class="col-md-8">
+<h1 class="mb-4">我的文章</h1>
+<div class="row">
+    {% if articles %}
+    {% for article in articles %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            {% if article.cover_image %}
+            <img src="{{ url_for('static', filename='images/' ~ article.cover_image) }}" class="card-img-top" alt="{{ article.title }}" style="max-height: 200px; object-fit: cover;">
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ article.title }}</h5>
+                <p class="card-text text-muted">
+                    <small>
+                        {{ article.created_at.strftime('%Y-%m-%d') }} |
+                        <a href="{{ url_for('frontend.category_detail', id=article.category.id) }}">{{ article.category.name }}</a>
+                        |
+                        作者: {{ article.author.username }} |
+                        浏览 {{ article.views }} 次
+                    </small>
+                </p>
+                <div class="mb-2">
+                    {% for tag in article.tags %}
+                    <span class="badge bg-primary me-1">
+                        <a href="{{ url_for('frontend.tag_detail', id=tag.id) }}" class="text-white text-decoration-none">{{ tag.name }}</a>
+                    </span>
+                    {% endfor %}
+                </div>
+                <p class="card-text">{{ article.content[:100] }}...</p>
+                <a href="{{ url_for('frontend.article_detail', id=article.id) }}" class="btn btn-primary">查看详情</a>
+                <a href="{{ url_for('frontend.edit_article', id=article.id) }}" class="btn btn-secondary">编辑</a>
+                <form action="{{ url_for('frontend.delete_article', id=article.id) }}" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('确定要删除这篇文章吗？');">删除</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info" role="alert">
+            您还没有发布任何文章，<a href="{{ url_for('frontend.create_article') }}" class="alert-link">点击这里</a> 发布您的第一篇文章。
+        </div>
+    </div>
+    {% endif %}
+</div>
+</div>
+{% endblock %}

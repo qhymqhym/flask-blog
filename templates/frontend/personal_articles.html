@@ -1,0 +1,90 @@
+{% extends 'frontend/personal_center.html' %}
+
+{% block content %}
+<div class="col-md-12">
+    <div class="personal-center">
+        <!-- 侧边栏 -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-avatar">
+                    {{ current_user.display_name[0].upper() }}
+                </div>
+                <h3>{{ current_user.display_name }}</h3>
+                <p class="text-light text-sm">个人中心</p>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="{{ url_for('frontend.personal_center') }}">个人概览</a></li>
+                <li><a href="{{ url_for('frontend.personal_articles') }}" class="active">文章管理</a></li>
+                <li><a href="{{ url_for('frontend.personal_comments') }}">评论管理</a></li>
+                <li><a href="{{ url_for('frontend.personal_likes') }}">点赞管理</a></li>
+                <li><a href="{{ url_for('frontend.edit_profile') }}">编辑资料</a></li>
+                <li><a href="{{ url_for('frontend.change_password') }}">修改密码</a></li>
+                <li><a href="{{ url_for('frontend.user_profile', user_id=current_user.id) }}">查看个人主页</a></li>
+                <li><a href="{{ url_for('frontend.logout') }}">退出登录</a></li>
+            </ul>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <h2 class="section-title">文章管理</h2>
+            
+            <!-- 文章状态筛选 -->
+            <div class="mb-4">
+                <div class="btn-group" role="group">
+                    <a href="{{ url_for('frontend.personal_articles', status='all') }}" class="btn btn-{{ 'primary' if status == 'all' else 'outline-primary' }}">全部</a>
+                    <a href="{{ url_for('frontend.personal_articles', status='published') }}" class="btn btn-{{ 'primary' if status == 'published' else 'outline-primary' }}">已发布</a>
+                    <a href="{{ url_for('frontend.personal_articles', status='draft') }}" class="btn btn-{{ 'primary' if status == 'draft' else 'outline-primary' }}">草稿</a>
+                </div>
+            </div>
+            
+            <!-- 文章列表 -->
+            {% if articles %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>标题</th>
+                            <th>分类</th>
+                            <th>状态</th>
+                            <th>发布时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for article in articles %}
+                        <tr>
+                            <td>
+                                {% if article.is_top %}
+                                <span class="badge bg-danger me-2">置顶</span>
+                                {% endif %}
+                                <a href="{{ url_for('frontend.article_detail', id=article.id) }}">{{ article.title }}</a>
+                            </td>
+                            <td>{{ article.category.name }}</td>
+                            <td>
+                                {% if article.status == 'published' %}
+                                <span class="badge bg-success">已发布</span>
+                                {% else %}
+                                <span class="badge bg-secondary">草稿</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ article.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('frontend.edit_article', id=article.id) }}" class="btn btn-sm btn-primary">编辑</a>
+                                <form action="{{ url_for('frontend.delete_article', id=article.id) }}" method="POST" style="display: inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('确定要删除这篇文章吗？');">删除</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                暂无文章
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

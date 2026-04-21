@@ -1,0 +1,12 @@
+Flask
+Flask-SQLAlchemy
+Flask-Login
+Flask-Bcrypt
+Flask-Caching
+Flask-Session
+Flask-WTF
+MySQL-connector-python
+pymysql
+markdown2
+Pygments
+openai
