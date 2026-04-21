@@ -92,15 +92,15 @@
                 'bold', 'italic', 'heading', '|',
                 'code', 'quote', 'unordered-list', 'ordered-list', '|',
                 'link', 'image', '|',
-                'preview', 'side-by-side', 'fullscreen', '|',
+                'preview', '|',
                 'guide'
             ],
             sideBySideFullscreen: false,
             placeholder: '请输入Markdown内容...'
         });
-        
+
         // 确保表单提交时内容被同步
-        document.querySelector('form').addEventListener('submit', function() {
+        document.querySelector('form').addEventListener('submit', function () {
             easyMDE.save();
         });
     });
